@@ -64,39 +64,54 @@ namespace PS2_Iso_Serializer
             Console.WriteLine("");
 
             //Looks for all files in the arhive
-            using (ArchiveFile archiveFile = new ArchiveFile(gameloc))
+            try
             {
-                foreach (Entry entry in archiveFile.Entries)
+                using (ArchiveFile archiveFile = new ArchiveFile(gameloc))
                 {
-                    //If any file in archive starts with a regional number, save it in variable
-                    filename = new string(entry.FileName.Take(4).ToArray());
-                    if (regionList.Contains(filename))
+                    foreach (Entry entry in archiveFile.Entries)
                     {
-                        gameserial = entry.FileName.Replace(".", String.Empty);
-                        gameserial = gameserial.Replace("_", "-");
+                        //If any file in archive starts with a regional number, save it in variable
+                        filename = new string(entry.FileName.Take(4).ToArray());
+                        if (regionList.Contains(filename))
+                        {
+                            gameserial = entry.FileName.Replace(".", String.Empty);
+                            gameserial = gameserial.Replace("_", "-");
 
-                        Console.WriteLine("Serial = " + gameserial);
+                            Console.WriteLine("Serial = " + gameserial);
+                        }
                     }
                 }
             }
-
-            using (var reader = new StreamReader(gameindex))
+            catch
             {
-                bool serialFound = false;
-                while (!reader.EndOfStream)
+                Console.WriteLine("Cannot read given image file");
+            }
+
+            try
+            {
+                using (var reader = new StreamReader(gameindex))
                 {
-                    var line = reader.ReadLine();
-                    if (line.Contains("Serial = " + gameserial))
+                    bool serialFound = false;
+                    while (!reader.EndOfStream)
                     {
-                        serialFound = true;
-                    }
-                    else if(serialFound == true)
-                    {
-                        Console.WriteLine(line);
-                        break;
+                        var line = reader.ReadLine();
+                        if (line.Contains("Serial = " + gameserial))
+                        {
+                            serialFound = true;
+                        }
+                        else if (serialFound == true)
+                        {
+                            Console.WriteLine(line);
+                            break;
+                        }
                     }
                 }
             }
+            catch
+            {
+                Console.WriteLine("Cannot read GameIndex.dbf");
+            }
+            
 
             Console.ReadLine();
 
